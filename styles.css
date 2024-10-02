@@ -17,12 +17,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #2c3e50; /* Dark background for navbar */
-    color: #fff;
+    background-color: #fff; /* Dark background for navbar */
+    color: #333;
   }
   
   .navbar .logo img {
-    height: 50px; /* Adjust logo size */
+    height: 150px; /* Adjust logo size */
   }
   
   .nav-links {
@@ -32,28 +32,29 @@ body {
   
   .nav-links a {
     text-decoration: none;
-    color: #fff;
+    color: #333;
     font-weight: bold;
     transition: color 0.3s ease;
   }
   
   .nav-links a:hover {
-    color: #f39c12; /* Hover color */
+    color: red;
   }
   
   /* Contact Me Button */
   .contact-btn {
     padding: 10px 20px;
     text-decoration: none;
-    color: #fff;
-    background-color: #e74c3c; /* Red button */
+    color: red;
+    border: 1px solid red;
     border-radius: 5px;
     font-weight: bold;
     transition: background-color 0.3s ease;
   }
   
   .contact-btn:hover {
-    background-color: #c0392b; /* Darker red on hover */
+    background-color: red; /* Darker red on hover */
+    color: #fff;
   }
   
   /* Button Styles */
@@ -61,14 +62,18 @@ body {
     margin: 20px 0;
     padding: 10px 20px;
     font-size: 1rem;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid red;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
   
   #strava-login-btn:hover {
-    background-color: #45a049;
+    background-color: rgb(117, 0, 0);
+    border: 1px solid rgb(117, 0, 0);
+    color: #fff;
   }
   
   /* Calendar Styles */
