@@ -1,37 +1,27 @@
 const clientId = '89647';
 const clientSecret = '5f3153577c7075ce79e34a136021a949ff52ed40';
 const redirectUri = 'https://keegan-hugh-kelly.github.io/peleton.github.io/';
-let accessToken = '';
-let refreshToken = '';
-let expiresAt = 0; // To store the expiration time of the access token
 
-// Check if user is already authorized on page load
+// Check if user is already authorized (no tokens saved in localStorage)
 function checkAuthorization() {
-  const storedAccessToken = localStorage.getItem('access_token');
+  const storedAccessToken = localStorage.getItem('access_token');  // We still check for stored tokens but won't use them
   const storedRefreshToken = localStorage.getItem('refresh_token');
   const storedExpiresAt = localStorage.getItem('expires_at');
   
-  // If tokens are stored and not expired, proceed to authorize
+  console.log("Stored Access Token:", storedAccessToken);
+  console.log("Stored Refresh Token:", storedRefreshToken);
+  console.log("Stored Expires At:", storedExpiresAt);
+
   if (storedAccessToken && storedRefreshToken && storedExpiresAt) {
-    accessToken = storedAccessToken;
-    refreshToken = storedRefreshToken;
-    expiresAt = storedExpiresAt;
-
-    console.log("Access Token:", accessToken);
-    console.log("Expires At:", expiresAt);
-
-    // If the token is expired, refresh it
-    if (Date.now() / 1000 > expiresAt) {
+    // If tokens found in localStorage, just use them and check for expiration
+    if (Date.now() / 1000 > storedExpiresAt) {
       console.log("Token expired, refreshing...");
-      refreshAccessToken();  // Refresh the token
+      refreshAccessToken();  // Refresh if expired
     } else {
       console.log("Token valid.");
-      // User is already authorized, hide the login button
-      document.getElementById('strava-login-btn').style.display = 'none';
-      document.getElementById('strava-login-section').style.display = 'none'; // Hide entire section if authorized
     }
   } else {
-    console.log("No tokens found, user not authorized.");
+    console.log("No tokens found, user needs to authorize.");
   }
 }
 
@@ -52,6 +42,7 @@ const code = urlParams.get('code');
 
 // If the authorization code is present, exchange it for access and refresh tokens
 if (code) {
+  console.log("Authorization code received:", code);
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
     headers: {
@@ -61,19 +52,16 @@ if (code) {
   })
   .then(response => response.json())
   .then(data => {
-    console.log("Authorization Data:", data); // Debug logging
+    console.log("Authorization Data:", data);
 
     if (data.access_token) {
-      accessToken = data.access_token;
-      refreshToken = data.refresh_token;
-      expiresAt = data.expires_at;
+      const accessToken = data.access_token;
+      const refreshToken = data.refresh_token;
+      const expiresAt = data.expires_at;
 
-      // Store tokens in localStorage
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
-      localStorage.setItem('expires_at', expiresAt);
-
-      console.log("Tokens stored successfully");
+      console.log("Access Token:", accessToken);
+      console.log("Refresh Token:", refreshToken);
+      console.log("Expires At:", expiresAt);
 
       // Hide the login button and section since the user is authorized
       document.getElementById('strava-login-btn').style.display = 'none';
@@ -89,29 +77,9 @@ if (code) {
 
 // Function to refresh access token when expired
 function refreshAccessToken() {
-  fetch('https://www.strava.com/oauth/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `client_id=${clientId}&client_secret=${clientSecret}&refresh_token=${refreshToken}&grant_type=refresh_token`,
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.access_token) {
-      accessToken = data.access_token;
-      expiresAt = data.expires_at;
-
-      // Store new tokens in localStorage
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('expires_at', expiresAt);
-
-      console.log("Access token refreshed.");
-    } else {
-      console.log("Failed to refresh token:", data);
-    }
-  })
-  .catch(error => {
-    console.error('Error refreshing token:', error);
-  });
+  const refreshToken = ''; // We no longer store a refresh token, so we'll need to re-authorize
+  console.log("Refreshing access token using refresh token:", refreshToken); // This will be unused
+  
+  // Since we are not using refresh tokens anymore, the user must authorize every time
+  stravaLogin(); // Force re-authorization
 }
