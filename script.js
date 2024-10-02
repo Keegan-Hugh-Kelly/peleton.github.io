@@ -19,7 +19,7 @@ function checkAuthorization() {
 
     console.log("Access Token:", accessToken);
     console.log("Expires At:", expiresAt);
-    
+
     // If the token is expired, refresh it
     if (Date.now() / 1000 > expiresAt) {
       console.log("Token expired, refreshing...");
@@ -61,6 +61,8 @@ if (code) {
   })
   .then(response => response.json())
   .then(data => {
+    console.log("Authorization Data:", data); // Debug logging
+
     if (data.access_token) {
       accessToken = data.access_token;
       refreshToken = data.refresh_token;
@@ -71,12 +73,18 @@ if (code) {
       localStorage.setItem('refresh_token', refreshToken);
       localStorage.setItem('expires_at', expiresAt);
 
+      console.log("Tokens stored successfully");
+
       // Hide the login button and section since the user is authorized
       document.getElementById('strava-login-btn').style.display = 'none';
       document.getElementById('strava-login-section').style.display = 'none';
+    } else {
+      console.log("Failed to retrieve access token:", data);
     }
   })
-  .catch(error => console.error('Error exchanging code:', error));
+  .catch(error => {
+    console.error('Error exchanging code:', error);
+  });
 }
 
 // Function to refresh access token when expired
@@ -99,9 +107,11 @@ function refreshAccessToken() {
       localStorage.setItem('expires_at', expiresAt);
 
       console.log("Access token refreshed.");
+    } else {
+      console.log("Failed to refresh token:", data);
     }
   })
-  .catch(error => console.error('Error refreshing token:', error));
+  .catch(error => {
+    console.error('Error refreshing token:', error);
+  });
 }
-
-// Function to get activity data (now removed)
