@@ -24,13 +24,14 @@
       </div>
 
       <!-- Contact Me Button -->
-      <a href="mailto:kgnhughkelly@gmail.com" class="contact-btn">Contact Me</a>
+      <a href="mailto:kgnhughkelly@gmail.com?subject=Inquiry&body=Hi, I would like to contact you regarding..." class="contact-btn">Contact Me</a>
     </nav>
 
-    <!-- Add a check to hide this if already authorized -->
-    <button id="strava-login-btn" onclick="stravaLogin()">
-      Connect with Strava
-    </button>
+    <div id="strava-login-section">
+        <h2>Connect Your Strava Account</h2>
+        <p>Sign in to sync your activities with our platform.</p>
+        <button id="strava-login-btn" onclick="stravaLogin()">Connect with Strava</button>
+    </div>
 
     <div id="activity-list"></div>
 

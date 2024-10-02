@@ -13,6 +13,8 @@ body {
   
   /* Navbar Styles */
   .navbar {
+    max-width: 40%;
+    margin: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -22,7 +24,7 @@ body {
   }
   
   .navbar .logo img {
-    height: 150px; /* Adjust logo size */
+    height: 200px; /* Adjust logo size */
   }
   
   .nav-links {

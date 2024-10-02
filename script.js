@@ -11,6 +11,7 @@ function checkAuthorization() {
   const storedRefreshToken = localStorage.getItem('refresh_token');
   const storedExpiresAt = localStorage.getItem('expires_at');
   
+  // If tokens are stored and not expired, proceed to authorize and fetch activities
   if (storedAccessToken && storedRefreshToken && storedExpiresAt) {
     accessToken = storedAccessToken;
     refreshToken = storedRefreshToken;
@@ -20,18 +21,20 @@ function checkAuthorization() {
     if (Date.now() / 1000 > expiresAt) {
       refreshAccessToken();
     } else {
-      // User is already authorized
+      // User is already authorized, hide the login button and fetch activities
       document.getElementById('strava-login-btn').style.display = 'none';
+      document.getElementById('strava-login-section').style.display = 'none'; // Hide entire section if authorized
       getActivities(accessToken);
     }
   }
 }
 
-// Check if the user has already authorized and hide button if so
+// Run authorization check when the page loads
 window.onload = function () {
   checkAuthorization();
 };
 
+// Function to trigger Strava login
 function stravaLogin() {
   window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read`;
 }
@@ -39,6 +42,7 @@ function stravaLogin() {
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 
+// If the authorization code is present, exchange it for access and refresh tokens
 if (code) {
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -63,14 +67,16 @@ if (code) {
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
 
-    // Hide the login button since user is authorized
+    // Hide the login button and section since the user is authorized
     document.getElementById('strava-login-btn').style.display = 'none';
+    document.getElementById('strava-login-section').style.display = 'none';
 
     getActivities(accessToken);
   })
   .catch(error => console.error('Error fetching token:', error));
 }
 
+// Function to refresh the access token using the refresh token
 function refreshAccessToken() {
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -100,6 +106,7 @@ function refreshAccessToken() {
   .catch(error => console.error('Error refreshing access token:', error));
 }
 
+// Fetch the user's Strava activities using the access token
 function getActivities(accessToken) {
   fetch('https://www.strava.com/api/v3/athlete/activities', {
     headers: {
@@ -108,11 +115,17 @@ function getActivities(accessToken) {
   })
   .then(response => response.json())
   .then(activities => {
-    displayActivities(activities);
+    if (activities.length === 0) {
+      // Display a message if no activities are found
+      document.getElementById('activity-list').innerHTML = '<p>No activities found.</p>';
+    } else {
+      displayActivities(activities);
+    }
   })
   .catch(error => console.error('Error fetching activities:', error));
 }
 
+// Display activities grouped by date
 function displayActivities(activities) {
   const activityList = document.getElementById('activity-list');
 
@@ -145,51 +158,40 @@ function displayActivities(activities) {
     dateSection.appendChild(dateTitle);
 
     activitiesByDate[date].forEach(activity => {
-      // Create the activity card
       const card = document.createElement('div');
       card.classList.add('activity-card');
 
-      // Activity title (name)
       const title = document.createElement('h3');
       title.textContent = activity.name;
       card.appendChild(title);
 
-      // Activity metrics: Distance, Time, Elevation, Speed
       const metrics = document.createElement('div');
       metrics.classList.add('metrics');
 
-      // Distance
       const distance = document.createElement('span');
       distance.classList.add('distance');
-      distance.textContent = `Distance: ${(activity.distance / 1000).toFixed(2)} km`; // Convert meters to km
+      distance.textContent = `Distance: ${(activity.distance / 1000).toFixed(2)} km`;
       metrics.appendChild(distance);
 
-      // Time
       const time = document.createElement('span');
       time.classList.add('time');
       time.textContent = `Time: ${formatTime(activity.moving_time)}`;
       metrics.appendChild(time);
 
-      // Elevation
       const elevation = document.createElement('span');
       elevation.classList.add('elevation');
       elevation.textContent = `Elevation: ${activity.total_elevation_gain} m`;
       metrics.appendChild(elevation);
 
-      // Speed (average speed)
       const speed = document.createElement('span');
       speed.classList.add('speed');
-      speed.textContent = `Speed: ${(activity.average_speed * 3.6).toFixed(2)} km/h`; // Convert m/s to km/h
+      speed.textContent = `Speed: ${(activity.average_speed * 3.6).toFixed(2)} km/h`;
       metrics.appendChild(speed);
 
-      // Append metrics to card
       card.appendChild(metrics);
-
-      // Append the card to the date section
       dateSection.appendChild(card);
     });
 
-    // Append the date section to the activity list
     activityList.appendChild(dateSection);
   });
 }
