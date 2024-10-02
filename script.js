@@ -92,27 +92,40 @@ function refreshAccessToken() {
   })
   .then(response => response.json())
   .then(data => {
-    accessToken = data.access_token;
-    expiresAt = Math.floor(Date.now() / 1000) + data.expires_in;
-
-    // Save the new access token and expiration time
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('expires_at', expiresAt);
-
-    // Fetch activities again after refresh
-    getActivities(accessToken);
+    if (data.access_token) {
+      accessToken = data.access_token;
+      expiresAt = Math.floor(Date.now() / 1000) + data.expires_in; // Save expiration time in seconds
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('expires_at', expiresAt);
+      getActivities(accessToken); // Fetch activities after refresh
+    } else {
+      console.error('Error refreshing access token:', data);
+      // If refreshing failed, log the error and ask the user to reauthorize
+      alert('Failed to refresh access token. Please reauthorize.');
+    }
   })
-  .catch(error => console.error('Error refreshing access token:', error));
+  .catch(error => {
+    console.error('Error refreshing access token:', error);
+  });
 }
 
-// Function to fetch and display Strava activities
+// Fetch activities from Strava
 function getActivities(accessToken) {
   fetch('https://www.strava.com/api/v3/athlete/activities', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(errorData => {
+        // Log the error response from Strava
+        console.error('Error fetching activities:', errorData);
+        throw new Error('Failed to fetch activities');
+      });
+    }
+    return response.json();
+  })
   .then(activities => {
     console.log('Activities:', activities); // Log the response for inspection
     if (Array.isArray(activities)) {
@@ -122,7 +135,9 @@ function getActivities(accessToken) {
       console.error('Expected activities to be an array, but received:', activities);
     }
   })
-  .catch(error => console.error('Error fetching activities:', error));
+  .catch(error => {
+    console.error('Error fetching activities:', error);
+  });
 }
 
 // Display activities in a list
