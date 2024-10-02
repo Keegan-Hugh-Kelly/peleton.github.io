@@ -1,8 +1,8 @@
 const clientId = '89647';
 const clientSecret = '5f3153577c7075ce79e34a136021a949ff52ed40';
 const redirectUri = 'https://keegan-hugh-kelly.github.io/peleton.github.io/';
-let accessToken = '3ab1bc609c9f8bdd88967f8cde8436dfddac5be7';
-let refreshToken = '96ac84c86ca3e751e2eb29fb32fd55ac1a10bd47';
+let accessToken = '';
+let refreshToken = '';
 let expiresAt = 0; // To store the expiration time of the access token
 
 // Check if user is already authorized on page load
@@ -36,7 +36,7 @@ window.onload = function () {
 
 // Function to trigger Strava login
 function stravaLogin() {
-  window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read`;
+  window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read&approval_prompt=auto`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -58,20 +58,24 @@ if (code) {
   })
   .then(response => response.json())
   .then(data => {
-    accessToken = data.access_token;
-    refreshToken = data.refresh_token;
-    expiresAt = Math.floor(Date.now() / 1000) + data.expires_in; // Save expiration time in seconds
+    if (data.access_token) {
+      accessToken = data.access_token;
+      refreshToken = data.refresh_token;
+      expiresAt = Math.floor(Date.now() / 1000) + data.expires_in; // Save expiration time in seconds
 
-    // Save tokens and expiration time to local storage
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('expires_at', expiresAt);
+      // Save tokens and expiration time to local storage
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
+      localStorage.setItem('expires_at', expiresAt);
 
-    // Hide the login section after successful login
-    document.getElementById('strava-login-section').style.display = 'none';
+      // Hide the login section after successful login
+      document.getElementById('strava-login-section').style.display = 'none';
 
-    // Fetch activities after successful authorization
-    getActivities(accessToken);
+      // Fetch activities after successful authorization
+      getActivities(accessToken);
+    } else {
+      console.error('Failed to fetch access token:', data);
+    }
   })
   .catch(error => console.error('Error during authorization:', error));
 }
@@ -99,8 +103,7 @@ function refreshAccessToken() {
       localStorage.setItem('expires_at', expiresAt);
       getActivities(accessToken); // Fetch activities after refresh
     } else {
-      console.error('Error refreshing access token:', data);
-      // If refreshing failed, log the error and ask the user to reauthorize
+      console.error('Failed to refresh access token:', data);
       alert('Failed to refresh access token. Please reauthorize.');
     }
   })
@@ -119,7 +122,6 @@ function getActivities(accessToken) {
   .then(response => {
     if (!response.ok) {
       return response.json().then(errorData => {
-        // Log the error response from Strava
         console.error('Error fetching activities:', errorData);
         throw new Error('Failed to fetch activities');
       });

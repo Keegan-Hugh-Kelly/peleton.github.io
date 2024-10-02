@@ -136,15 +136,9 @@ h1 {
 
 .contact-btn-mobile {
     padding: 10px 20px;
-    background-color: red;
     color: white;
     border-radius: 5px;
     font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.contact-btn-mobile:hover {
-    background-color: darkred;
 }
 
 /* Media Query for mobile devices (max-width: 768px) */
