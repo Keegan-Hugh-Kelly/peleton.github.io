@@ -56,14 +56,9 @@ if (code) {
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code: code,
-      grant_type: 'authorization_code',
-    }),
+    body: `client_id=${clientId}&client_secret=${clientSecret}&code=${code}&grant_type=authorization_code&redirect_uri=${redirectUri}`,
   })
   .then(response => response.json())
   .then(data => {
@@ -95,14 +90,9 @@ function refreshAccessToken() {
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    }),
+    body: `client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token&refresh_token=${refreshToken}`,
   })
   .then(response => response.json())
   .then(data => {
