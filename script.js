@@ -60,23 +60,23 @@ if (code) {
   .then(data => {
     accessToken = data.access_token;
     refreshToken = data.refresh_token;
-    expiresAt = data.expires_at;
+    expiresAt = Math.floor(Date.now() / 1000) + data.expires_in; // Save expiration time in seconds
 
-    // Store tokens in localStorage
+    // Save tokens and expiration time to local storage
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
 
-    // Hide the login button and section since the user is authorized
-    document.getElementById('strava-login-btn').style.display = 'none';
+    // Hide the login section after successful login
     document.getElementById('strava-login-section').style.display = 'none';
 
+    // Fetch activities after successful authorization
     getActivities(accessToken);
   })
-  .catch(error => console.error('Error fetching token:', error));
+  .catch(error => console.error('Error during authorization:', error));
 }
 
-// Function to refresh the access token using the refresh token
+// Refresh the access token using the refresh token
 function refreshAccessToken() {
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -86,120 +86,84 @@ function refreshAccessToken() {
     body: JSON.stringify({
       client_id: clientId,
       client_secret: clientSecret,
-      grant_type: 'refresh_token',
       refresh_token: refreshToken,
+      grant_type: 'refresh_token',
     }),
   })
   .then(response => response.json())
   .then(data => {
     accessToken = data.access_token;
-    refreshToken = data.refresh_token;
-    expiresAt = data.expires_at;
+    expiresAt = Math.floor(Date.now() / 1000) + data.expires_in;
 
-    // Update tokens in localStorage
+    // Save the new access token and expiration time
     localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
 
+    // Fetch activities again after refresh
     getActivities(accessToken);
   })
   .catch(error => console.error('Error refreshing access token:', error));
 }
 
-// Fetch the user's Strava activities using the access token
+// Function to fetch and display Strava activities
 function getActivities(accessToken) {
   fetch('https://www.strava.com/api/v3/athlete/activities', {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
     },
   })
   .then(response => response.json())
   .then(activities => {
-    if (activities.length === 0) {
-      // Display a message if no activities are found
-      document.getElementById('activity-list').innerHTML = '<p>No activities found.</p>';
-    } else {
-      displayActivities(activities);
-    }
+    displayActivities(activities);
+    displayChart(activities); // Show activities chart
   })
   .catch(error => console.error('Error fetching activities:', error));
 }
 
-// Display activities grouped by date
+// Display activities in a list
 function displayActivities(activities) {
   const activityList = document.getElementById('activity-list');
-
-  // Check if the activity list exists before attempting to populate it
-  if (!activityList) {
-    console.error("Activity list element not found!");
-    return;
-  }
-
-  // Clear previous activities
-  activityList.innerHTML = '';
-
-  // Group activities by date
-  const activitiesByDate = {};
   activities.forEach(activity => {
-    const activityDate = new Date(activity.start_date).toDateString(); // Format date (e.g. "Wed Oct 02 2024")
-    if (!activitiesByDate[activityDate]) {
-      activitiesByDate[activityDate] = [];
-    }
-    activitiesByDate[activityDate].push(activity);
-  });
-
-  // Create cards for each date
-  Object.keys(activitiesByDate).forEach(date => {
-    const dateSection = document.createElement('div');
-    dateSection.classList.add('date-section');
-
-    const dateTitle = document.createElement('h2');
-    dateTitle.textContent = date; // Display the date
-    dateSection.appendChild(dateTitle);
-
-    activitiesByDate[date].forEach(activity => {
-      const card = document.createElement('div');
-      card.classList.add('activity-card');
-
-      const title = document.createElement('h3');
-      title.textContent = activity.name;
-      card.appendChild(title);
-
-      const metrics = document.createElement('div');
-      metrics.classList.add('metrics');
-
-      const distance = document.createElement('span');
-      distance.classList.add('distance');
-      distance.textContent = `Distance: ${(activity.distance / 1000).toFixed(2)} km`;
-      metrics.appendChild(distance);
-
-      const time = document.createElement('span');
-      time.classList.add('time');
-      time.textContent = `Time: ${formatTime(activity.moving_time)}`;
-      metrics.appendChild(time);
-
-      const elevation = document.createElement('span');
-      elevation.classList.add('elevation');
-      elevation.textContent = `Elevation: ${activity.total_elevation_gain} m`;
-      metrics.appendChild(elevation);
-
-      const speed = document.createElement('span');
-      speed.classList.add('speed');
-      speed.textContent = `Speed: ${(activity.average_speed * 3.6).toFixed(2)} km/h`;
-      metrics.appendChild(speed);
-
-      card.appendChild(metrics);
-      dateSection.appendChild(card);
-    });
-
-    activityList.appendChild(dateSection);
+    const activityCard = document.createElement('div');
+    activityCard.classList.add('activity-card');
+    activityCard.innerHTML = `
+      <h3>${activity.name}</h3>
+      <p><strong>Type:</strong> ${activity.type}</p>
+      <p><strong>Distance:</strong> ${(activity.distance / 1000).toFixed(2)} km</p>
+      <p><strong>Date:</strong> ${new Date(activity.start_date).toLocaleDateString()}</p>
+    `;
+    activityList.appendChild(activityCard);
   });
 }
 
-// Utility to format time from seconds to HH:MM:SS
-function formatTime(seconds) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  return `${hours}h ${minutes}m ${secs}s`;
+// Display activities chart
+function displayChart(activities) {
+  const ctx = document.getElementById('myChart').getContext('2d');
+  const labels = activities.map(activity => new Date(activity.start_date).toLocaleDateString());
+  const data = activities.map(activity => activity.distance / 1000); // Convert meters to km
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Distance (km)',
+        data: data,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+      }],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          beginAtZero: true,
+        },
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 }
