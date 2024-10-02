@@ -17,15 +17,22 @@ function checkAuthorization() {
     refreshToken = storedRefreshToken;
     expiresAt = storedExpiresAt;
 
+    console.log("Access Token:", accessToken);
+    console.log("Expires At:", expiresAt);
+    
     // If the token is expired, refresh it
     if (Date.now() / 1000 > expiresAt) {
-      refreshAccessToken();
+      console.log("Token expired, refreshing...");
+      refreshAccessToken();  // Refresh the token
     } else {
+      console.log("Token valid, fetching activities...");
       // User is already authorized, hide the login button and fetch activities
       document.getElementById('strava-login-btn').style.display = 'none';
       document.getElementById('strava-login-section').style.display = 'none'; // Hide entire section if authorized
       getActivities(accessToken);
     }
+  } else {
+    console.log("No tokens found, user not authorized.");
   }
 }
 
@@ -84,6 +91,7 @@ if (code) {
 
 // Function to refresh the access token using the refresh token
 function refreshAccessToken() {
+  console.log("Refreshing token with refresh token:", refreshToken);
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
     headers: {
@@ -98,22 +106,21 @@ function refreshAccessToken() {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.access_token) {
-      accessToken = data.access_token;
-      refreshToken = data.refresh_token;
-      expiresAt = data.expires_at;
+    console.log("Token refreshed successfully:", data);
+    accessToken = data.access_token;
+    refreshToken = data.refresh_token;
+    expiresAt = data.expires_at;
 
-      // Update tokens in localStorage
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
-      localStorage.setItem('expires_at', expiresAt);
+    // Update tokens in localStorage
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('expires_at', expiresAt);
 
-      getActivities(accessToken);
-    } else {
-      console.error('Error: Unable to refresh access token.');
-    }
+    getActivities(accessToken);
   })
-  .catch(error => console.error('Error refreshing access token:', error));
+  .catch(error => {
+    console.error('Error refreshing access token:', error);
+  });
 }
 
 // Fetch the user's Strava activities using the access token
