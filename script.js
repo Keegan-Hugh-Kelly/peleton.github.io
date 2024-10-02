@@ -36,7 +36,7 @@ window.onload = function () {
 
 // Function to trigger Strava login
 function stravaLogin() {
-  window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read&approval_prompt=auto`;
+  window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -58,29 +58,25 @@ if (code) {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.access_token) {
-      accessToken = data.access_token;
-      refreshToken = data.refresh_token;
-      expiresAt = Math.floor(Date.now() / 1000) + data.expires_in; // Save expiration time in seconds
+    accessToken = data.access_token;
+    refreshToken = data.refresh_token;
+    expiresAt = data.expires_at;
 
-      // Save tokens and expiration time to local storage
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
-      localStorage.setItem('expires_at', expiresAt);
+    // Store tokens in localStorage
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('expires_at', expiresAt);
 
-      // Hide the login section after successful login
-      document.getElementById('strava-login-section').style.display = 'none';
+    // Hide the login button and section since the user is authorized
+    document.getElementById('strava-login-btn').style.display = 'none';
+    document.getElementById('strava-login-section').style.display = 'none';
 
-      // Fetch activities after successful authorization
-      getActivities(accessToken);
-    } else {
-      console.error('Failed to fetch access token:', data);
-    }
+    getActivities(accessToken);
   })
-  .catch(error => console.error('Error during authorization:', error));
+  .catch(error => console.error('Error fetching token:', error));
 }
 
-// Refresh the access token using the refresh token
+// Function to refresh the access token using the refresh token
 function refreshAccessToken() {
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -90,108 +86,120 @@ function refreshAccessToken() {
     body: JSON.stringify({
       client_id: clientId,
       client_secret: clientSecret,
-      refresh_token: refreshToken,
       grant_type: 'refresh_token',
+      refresh_token: refreshToken,
     }),
   })
   .then(response => response.json())
   .then(data => {
-    if (data.access_token) {
-      accessToken = data.access_token;
-      expiresAt = Math.floor(Date.now() / 1000) + data.expires_in; // Save expiration time in seconds
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('expires_at', expiresAt);
-      getActivities(accessToken); // Fetch activities after refresh
-    } else {
-      console.error('Failed to refresh access token:', data);
-      alert('Failed to refresh access token. Please reauthorize.');
-    }
+    accessToken = data.access_token;
+    refreshToken = data.refresh_token;
+    expiresAt = data.expires_at;
+
+    // Update tokens in localStorage
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('expires_at', expiresAt);
+
+    getActivities(accessToken);
   })
-  .catch(error => {
-    console.error('Error refreshing access token:', error);
-  });
+  .catch(error => console.error('Error refreshing access token:', error));
 }
 
-// Fetch activities from Strava
+// Fetch the user's Strava activities using the access token
 function getActivities(accessToken) {
   fetch('https://www.strava.com/api/v3/athlete/activities', {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(errorData => {
-        console.error('Error fetching activities:', errorData);
-        throw new Error('Failed to fetch activities');
-      });
-    }
-    return response.json();
-  })
+  .then(response => response.json())
   .then(activities => {
-    console.log('Activities:', activities); // Log the response for inspection
-    if (Array.isArray(activities)) {
-      displayActivities(activities);
-      displayChart(activities); // Show activities chart
+    if (activities.length === 0) {
+      // Display a message if no activities are found
+      document.getElementById('activity-list').innerHTML = '<p>No activities found.</p>';
     } else {
-      console.error('Expected activities to be an array, but received:', activities);
+      displayActivities(activities);
     }
   })
-  .catch(error => {
-    console.error('Error fetching activities:', error);
-  });
+  .catch(error => console.error('Error fetching activities:', error));
 }
 
-// Display activities in a list
+// Display activities grouped by date
 function displayActivities(activities) {
   const activityList = document.getElementById('activity-list');
-  
-  // Check if activities is an array
-  if (Array.isArray(activities)) {
-    activities.forEach(activity => {
-      const activityCard = document.createElement('div');
-      activityCard.classList.add('activity-card');
-      activityCard.innerHTML = `
-        <h3>${activity.name}</h3>
-        <p><strong>Type:</strong> ${activity.type}</p>
-        <p><strong>Distance:</strong> ${(activity.distance / 1000).toFixed(2)} km</p>
-        <p><strong>Date:</strong> ${new Date(activity.start_date).toLocaleDateString()}</p>
-      `;
-      activityList.appendChild(activityCard);
-    });
-  } else {
-    console.error('Received data is not an array:', activities);
+
+  // Check if the activity list exists before attempting to populate it
+  if (!activityList) {
+    console.error("Activity list element not found!");
+    return;
   }
+
+  // Clear previous activities
+  activityList.innerHTML = '';
+
+  // Group activities by date
+  const activitiesByDate = {};
+  activities.forEach(activity => {
+    const activityDate = new Date(activity.start_date).toDateString(); // Format date (e.g. "Wed Oct 02 2024")
+    if (!activitiesByDate[activityDate]) {
+      activitiesByDate[activityDate] = [];
+    }
+    activitiesByDate[activityDate].push(activity);
+  });
+
+  // Create cards for each date
+  Object.keys(activitiesByDate).forEach(date => {
+    const dateSection = document.createElement('div');
+    dateSection.classList.add('date-section');
+
+    const dateTitle = document.createElement('h2');
+    dateTitle.textContent = date; // Display the date
+    dateSection.appendChild(dateTitle);
+
+    activitiesByDate[date].forEach(activity => {
+      const card = document.createElement('div');
+      card.classList.add('activity-card');
+
+      const title = document.createElement('h3');
+      title.textContent = activity.name;
+      card.appendChild(title);
+
+      const metrics = document.createElement('div');
+      metrics.classList.add('metrics');
+
+      const distance = document.createElement('span');
+      distance.classList.add('distance');
+      distance.textContent = `Distance: ${(activity.distance / 1000).toFixed(2)} km`;
+      metrics.appendChild(distance);
+
+      const time = document.createElement('span');
+      time.classList.add('time');
+      time.textContent = `Time: ${formatTime(activity.moving_time)}`;
+      metrics.appendChild(time);
+
+      const elevation = document.createElement('span');
+      elevation.classList.add('elevation');
+      elevation.textContent = `Elevation: ${activity.total_elevation_gain} m`;
+      metrics.appendChild(elevation);
+
+      const speed = document.createElement('span');
+      speed.classList.add('speed');
+      speed.textContent = `Speed: ${(activity.average_speed * 3.6).toFixed(2)} km/h`;
+      metrics.appendChild(speed);
+
+      card.appendChild(metrics);
+      dateSection.appendChild(card);
+    });
+
+    activityList.appendChild(dateSection);
+  });
 }
 
-// Display activities chart
-function displayChart(activities) {
-  const ctx = document.getElementById('myChart').getContext('2d');
-  const labels = activities.map(activity => new Date(activity.start_date).toLocaleDateString());
-  const data = activities.map(activity => activity.distance / 1000); // Convert meters to km
-
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Distance (km)',
-        data: data,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        fill: true,
-      }],
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          beginAtZero: true,
-        },
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  });
+// Utility to format time from seconds to HH:MM:SS
+function formatTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours}h ${minutes}m ${secs}s`;
 }
