@@ -1,9 +1,36 @@
 const clientId = '89647';
 const clientSecret = '5f3153577c7075ce79e34a136021a949ff52ed40';
 const redirectUri = 'https://keegan-hugh-kelly.github.io/peleton.github.io/';
-let accessToken = '3ab1bc609c9f8bdd88967f8cde8436dfddac5be7';
-let refreshToken = '96ac84c86ca3e751e2eb29fb32fd55ac1a10bd47';
+let accessToken = '';
+let refreshToken = '';
 let expiresAt = 0; // To store the expiration time of the access token
+
+// Check if user is already authorized on page load
+function checkAuthorization() {
+  const storedAccessToken = localStorage.getItem('access_token');
+  const storedRefreshToken = localStorage.getItem('refresh_token');
+  const storedExpiresAt = localStorage.getItem('expires_at');
+  
+  if (storedAccessToken && storedRefreshToken && storedExpiresAt) {
+    accessToken = storedAccessToken;
+    refreshToken = storedRefreshToken;
+    expiresAt = storedExpiresAt;
+
+    // If the token is expired, refresh it
+    if (Date.now() / 1000 > expiresAt) {
+      refreshAccessToken();
+    } else {
+      // User is already authorized
+      document.getElementById('strava-login-btn').style.display = 'none';
+      getActivities(accessToken);
+    }
+  }
+}
+
+// Check if the user has already authorized and hide button if so
+window.onload = function () {
+  checkAuthorization();
+};
 
 function stravaLogin() {
   window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read`;
@@ -30,22 +57,18 @@ if (code) {
     accessToken = data.access_token;
     refreshToken = data.refresh_token;
     expiresAt = data.expires_at;
+
+    // Store tokens in localStorage
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
+
+    // Hide the login button since user is authorized
+    document.getElementById('strava-login-btn').style.display = 'none';
+
     getActivities(accessToken);
   })
   .catch(error => console.error('Error fetching token:', error));
-} else if (localStorage.getItem('access_token')) {
-  accessToken = localStorage.getItem('access_token');
-  refreshToken = localStorage.getItem('refresh_token');
-  expiresAt = localStorage.getItem('expires_at');
-  
-  if (Date.now() / 1000 > expiresAt) {
-    refreshAccessToken();
-  } else {
-    getActivities(accessToken);
-  }
 }
 
 function refreshAccessToken() {
@@ -66,9 +89,12 @@ function refreshAccessToken() {
     accessToken = data.access_token;
     refreshToken = data.refresh_token;
     expiresAt = data.expires_at;
+
+    // Update tokens in localStorage
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
+
     getActivities(accessToken);
   })
   .catch(error => console.error('Error refreshing access token:', error));
@@ -82,7 +108,7 @@ function getActivities(accessToken) {
   })
   .then(response => response.json())
   .then(activities => {
-    displayActivities(activities); // Pass activities to display function
+    displayActivities(activities);
   })
   .catch(error => console.error('Error fetching activities:', error));
 }
