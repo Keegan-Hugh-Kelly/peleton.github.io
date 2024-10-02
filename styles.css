@@ -79,26 +79,6 @@ h1 {
     color: #fff;
 }
 
-/* Activity List Styling */
-#activity-list {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #f4f4f4;
-    border-radius: 8px;
-}
-
-.activity-card {
-    background-color: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.activity-card p {
-    font-size: 1rem;
-}
-
 /* Chart Container Styling */
 #chart-container {
     width: 90%;
