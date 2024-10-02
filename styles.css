@@ -13,7 +13,7 @@ body {
   
   /* Navbar Styles */
   .navbar {
-    max-width: 40%;
+    max-width: 90%;
     margin: auto;
     display: flex;
     justify-content: space-between;
