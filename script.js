@@ -114,21 +114,33 @@ function getActivities(accessToken) {
 }
 
 function displayActivities(activities) {
-  const activityList = document.getElementById('activity-list');
+  const calendar = document.getElementById('calendar');
 
   // Clear previous activities
-  activityList.innerHTML = '';
+  calendar.innerHTML = '';
 
   activities.forEach(activity => {
+    const activityDate = new Date(activity.start_date);
+    const day = activityDate.getDate();
+    const month = activityDate.getMonth();
+    const year = activityDate.getFullYear();
+
+    // Create a calendar cell for the activity date
+    let dayCell = document.querySelector(`#calendar .day[data-day="${day}"][data-month="${month}"][data-year="${year}"]`);
+
+    if (!dayCell) {
+      // If the day cell does not exist, create a new cell
+      dayCell = document.createElement('div');
+      dayCell.classList.add('calendar-cell');
+      dayCell.setAttribute('data-day', day);
+      dayCell.setAttribute('data-month', month);
+      dayCell.setAttribute('data-year', year);
+      calendar.appendChild(dayCell);
+    }
+
     // Create the activity card
     const card = document.createElement('div');
     card.classList.add('activity-card');
-
-    // Add the activity image (using a placeholder for now)
-    const img = document.createElement('img');
-    img.src = activity.picture || 'https://via.placeholder.com/300x200'; // Use a placeholder image if no activity image
-    img.alt = `Activity ${activity.id}`;
-    card.appendChild(img);
 
     // Activity title (name)
     const title = document.createElement('h3');
@@ -160,9 +172,62 @@ function displayActivities(activities) {
     // Append metrics to card
     card.appendChild(metrics);
 
-    // Append the card to the activity list
-    activityList.appendChild(card);
+    // Add a map for each activity route
+    const mapDiv = document.createElement('div');
+    mapDiv.classList.add('activity-map');
+    card.appendChild(mapDiv);
+
+    // Use Leaflet.js to render the map
+    const map = L.map(mapDiv).setView([activity.start_latitude, activity.start_longitude], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    const routeCoordinates = activity.map.summary_polyline ? decodePolyline(activity.map.summary_polyline) : [];
+    if (routeCoordinates.length) {
+      L.polyline(routeCoordinates, { color: 'blue' }).addTo(map);
+      map.fitBounds(L.polyline(routeCoordinates).getBounds());
+    }
+
+    // Append the card to the day cell
+    dayCell.appendChild(card);
   });
+}
+
+// Function to decode the polyline provided by Strava
+function decodePolyline(encoded) {
+  let points = [];
+  let index = 0, len = encoded.length;
+  let lat = 0, lng = 0;
+
+  while (index < len) {
+    let result = 1, shift = 0, byte;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result += byte << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    let dLat = result & 1 ? ~(result >> 1) : result >> 1;
+    lat += dLat;
+
+    shift = 0, result = 1;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result += byte << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    let dLng = result & 1 ? ~(result >> 1) : result >> 1;
+    lng += dLng;
+
+    points.push([lat / 1E5, lng / 1E5]);
+  }
+
+  return points;
 }
 
 // Utility to format time from seconds to HH:MM:SS

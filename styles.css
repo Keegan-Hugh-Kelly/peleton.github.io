@@ -1,84 +1,105 @@
-/* General reset */
-* {
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    background-color: #f4f4f4;
-    padding: 20px;
     text-align: center;
   }
   
   h1 {
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    margin-top: 20px;
   }
   
-  /* Container for activity list */
-  .activity-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
+  /* Button Styles */
+  #strava-login-btn {
+    margin: 20px 0;
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
   }
   
-  /* Individual activity card */
+  #strava-login-btn:hover {
+    background-color: #45a049;
+  }
+  
+  /* Calendar Styles */
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 days in a week */
+    gap: 10px;
+    max-width: 700px;
+    margin: 20px auto;
+  }
+  
+  .calendar-cell {
+    border: 1px solid #ccc;
+    padding: 5px;
+    min-height: 100px;
+    position: relative;
+  }
+  
+  .calendar-cell .activity-list {
+    max-height: 200px;
+    overflow-y: scroll;
+  }
+  
+  /* Activity Card Styles */
   .activity-card {
-    background-color: #ffffff;
     border: 1px solid #ddd;
-    border-radius: 10px;
-    width: 300px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .activity-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .activity-card img {
-    width: 100%;
-    border-radius: 10px;
-    height: 200px;
-    object-fit: cover;
+    padding: 10px;
+    background-color: #f9f9f9;
     margin-bottom: 10px;
   }
   
   .activity-card h3 {
+    margin: 0;
     font-size: 1.2rem;
-    margin-bottom: 10px;
   }
   
   .activity-card p {
-    margin-bottom: 5px;
-    color: #555;
+    margin: 5px 0;
+    font-size: 1rem;
   }
   
-  .activity-card .metrics {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-    color: #333;
+  .activity-card .activity-map {
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
   }
   
-  .activity-card .metrics span {
-    font-weight: bold;
+  /* Map Styles */
+  .leaflet-container {
+    width: 100%;
+    height: 200px;
   }
   
-  .activity-card .metrics span.time {
-    color: #2196F3;
+  /* Chart Styles */
+  #chart-container {
+    width: 60%;
+    margin: 20px auto;
   }
   
-  .activity-card .metrics span.distance {
-    color: #4CAF50;
+  /* Layout adjustments */
+  #calendar {
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* For 7 days in a week */
+    gap: 10px;
   }
   
-  .activity-card .metrics span.elevation {
-    color: #FFC107;
+  #calendar .calendar-cell {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 100px;
+    position: relative;
+  }
+  
+  #calendar .calendar-cell .activity-list {
+    max-height: 200px;
+    overflow-y: scroll;
   }
   

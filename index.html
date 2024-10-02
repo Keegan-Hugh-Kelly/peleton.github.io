@@ -10,17 +10,19 @@
   <body>
     <h1>Welcome to Peleton</h1>
     <p>Track your rides and performance with Strava integration</p>
+
     <!-- Add a check to hide this if already authorized -->
-    <button id="strava-login-btn" onclick="stravaLogin()">Connect with Strava</button>
-    
-    <!-- Activity list container -->
-    <div id="activity-list" class="activity-list">
-      <!-- Each activity will be appended here as a card -->
-    </div>
-    
-    <div id="chart-container" style="width: 60%; margin: 0 auto">
+    <button id="strava-login-btn" onclick="stravaLogin()">
+      Connect with Strava
+    </button>
+
+    <!-- Calendar to display activities -->
+    <div id="calendar" class="calendar"></div>
+
+    <div id="chart-container">
       <canvas id="myChart"></canvas>
     </div>
+
     <script src="script.js"></script>
   </body>
 </html>
