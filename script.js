@@ -6,16 +6,13 @@ let refreshToken = '96ac84c86ca3e751e2eb29fb32fd55ac1a10bd47';
 let expiresAt = 0; // To store the expiration time of the access token
 
 function stravaLogin() {
-  // Redirect user to Strava for authorization
   window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=activity:read`;
 }
 
-// Check if Strava has redirected with an authorization code
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 
 if (code) {
-  // If the user has authorized and returned with the code, exchange for an access token
   fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
     headers: {
@@ -36,11 +33,10 @@ if (code) {
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
-    getActivities(accessToken); // Fetch user activities
+    getActivities(accessToken);
   })
   .catch(error => console.error('Error fetching token:', error));
 } else if (localStorage.getItem('access_token')) {
-  // If there's already an access token stored, check its expiration
   accessToken = localStorage.getItem('access_token');
   refreshToken = localStorage.getItem('refresh_token');
   expiresAt = localStorage.getItem('expires_at');
@@ -67,14 +63,13 @@ function refreshAccessToken() {
   })
   .then(response => response.json())
   .then(data => {
-    // Store new tokens
     accessToken = data.access_token;
     refreshToken = data.refresh_token;
     expiresAt = data.expires_at;
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('expires_at', expiresAt);
-    getActivities(accessToken); // Fetch user activities
+    getActivities(accessToken);
   })
   .catch(error => console.error('Error refreshing access token:', error));
 }
@@ -87,18 +82,67 @@ function getActivities(accessToken) {
   })
   .then(response => response.json())
   .then(activities => {
-    displayActivities(activities); // Display activities on the page
+    displayActivities(activities); // Pass activities to display function
   })
   .catch(error => console.error('Error fetching activities:', error));
 }
 
 function displayActivities(activities) {
   const activityList = document.getElementById('activity-list');
-  activityList.innerHTML = ''; // Clear any existing activities
+
+  // Clear previous activities
+  activityList.innerHTML = '';
 
   activities.forEach(activity => {
-    const activityItem = document.createElement('li');
-    activityItem.textContent = `${activity.name} - ${activity.distance / 1000} km`;
-    activityList.appendChild(activityItem);
+    // Create the activity card
+    const card = document.createElement('div');
+    card.classList.add('activity-card');
+
+    // Add the activity image (using a placeholder for now)
+    const img = document.createElement('img');
+    img.src = activity.picture || 'https://via.placeholder.com/300x200'; // Use a placeholder image if no activity image
+    img.alt = `Activity ${activity.id}`;
+    card.appendChild(img);
+
+    // Activity title (name)
+    const title = document.createElement('h3');
+    title.textContent = activity.name;
+    card.appendChild(title);
+
+    // Activity metrics: Time, Distance, Elevation
+    const metrics = document.createElement('div');
+    metrics.classList.add('metrics');
+
+    // Time
+    const time = document.createElement('span');
+    time.classList.add('time');
+    time.textContent = `Time: ${formatTime(activity.moving_time)}`;
+    metrics.appendChild(time);
+
+    // Distance
+    const distance = document.createElement('span');
+    distance.classList.add('distance');
+    distance.textContent = `Distance: ${(activity.distance / 1000).toFixed(2)} km`; // Convert meters to km
+    metrics.appendChild(distance);
+
+    // Elevation
+    const elevation = document.createElement('span');
+    elevation.classList.add('elevation');
+    elevation.textContent = `Elevation: ${activity.total_elevation_gain} m`;
+    metrics.appendChild(elevation);
+
+    // Append metrics to card
+    card.appendChild(metrics);
+
+    // Append the card to the activity list
+    activityList.appendChild(card);
   });
+}
+
+// Utility to format time from seconds to HH:MM:SS
+function formatTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours}h ${minutes}m ${secs}s`;
 }

@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peleton</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peleton | Strava Visualization Tool</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
     <h1>Welcome to Peleton</h1>
     <p>Track your rides and performance with Strava integration</p>
     <button onclick="stravaLogin()">Connect with Strava</button>
-    <ul id="activity-list"></ul>
+    <!-- Activity list container -->
+    <div id="activity-list" class="activity-list">
+      <!-- Each activity will be appended here as a card -->
+    </div>
+    <div id="chart-container" style="width: 60%; margin: 0 auto">
+      <canvas id="myChart"></canvas>
+    </div>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

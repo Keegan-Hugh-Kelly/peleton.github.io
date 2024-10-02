@@ -1,0 +1,84 @@
+/* General reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  h1 {
+    margin-bottom: 20px;
+  }
+  
+  /* Container for activity list */
+  .activity-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  /* Individual activity card */
+  .activity-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 300px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .activity-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .activity-card img {
+    width: 100%;
+    border-radius: 10px;
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+  
+  .activity-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  .activity-card p {
+    margin-bottom: 5px;
+    color: #555;
+  }
+  
+  .activity-card .metrics {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    color: #333;
+  }
+  
+  .activity-card .metrics span {
+    font-weight: bold;
+  }
+  
+  .activity-card .metrics span.time {
+    color: #2196F3;
+  }
+  
+  .activity-card .metrics span.distance {
+    color: #4CAF50;
+  }
+  
+  .activity-card .metrics span.elevation {
+    color: #FFC107;
+  }
+  
