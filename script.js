@@ -114,8 +114,13 @@ function getActivities(accessToken) {
   })
   .then(response => response.json())
   .then(activities => {
-    displayActivities(activities);
-    displayChart(activities); // Show activities chart
+    console.log('Activities:', activities); // Log the response for inspection
+    if (Array.isArray(activities)) {
+      displayActivities(activities);
+      displayChart(activities); // Show activities chart
+    } else {
+      console.error('Expected activities to be an array, but received:', activities);
+    }
   })
   .catch(error => console.error('Error fetching activities:', error));
 }
@@ -123,17 +128,23 @@ function getActivities(accessToken) {
 // Display activities in a list
 function displayActivities(activities) {
   const activityList = document.getElementById('activity-list');
-  activities.forEach(activity => {
-    const activityCard = document.createElement('div');
-    activityCard.classList.add('activity-card');
-    activityCard.innerHTML = `
-      <h3>${activity.name}</h3>
-      <p><strong>Type:</strong> ${activity.type}</p>
-      <p><strong>Distance:</strong> ${(activity.distance / 1000).toFixed(2)} km</p>
-      <p><strong>Date:</strong> ${new Date(activity.start_date).toLocaleDateString()}</p>
-    `;
-    activityList.appendChild(activityCard);
-  });
+  
+  // Check if activities is an array
+  if (Array.isArray(activities)) {
+    activities.forEach(activity => {
+      const activityCard = document.createElement('div');
+      activityCard.classList.add('activity-card');
+      activityCard.innerHTML = `
+        <h3>${activity.name}</h3>
+        <p><strong>Type:</strong> ${activity.type}</p>
+        <p><strong>Distance:</strong> ${(activity.distance / 1000).toFixed(2)} km</p>
+        <p><strong>Date:</strong> ${new Date(activity.start_date).toLocaleDateString()}</p>
+      `;
+      activityList.appendChild(activityCard);
+    });
+  } else {
+    console.error('Received data is not an array:', activities);
+  }
 }
 
 // Display activities chart
