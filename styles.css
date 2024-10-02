@@ -4,16 +4,17 @@ body {
     margin: 0;
     padding: 0;
     text-align: center;
-  }
-  
-  h1 {
+}
+
+h1 {
     font-size: 2.5rem;
     margin-top: 20px;
-  }
-  
-  /* Navbar Styles */
-  .navbar {
+}
+
+/* Navbar Styles */
+.navbar {
     max-width: 90%;
+    min-width: 80%;
     margin: auto;
     display: flex;
     justify-content: space-between;
@@ -21,30 +22,30 @@ body {
     padding: 10px 20px;
     background-color: #fff;
     color: #333;
-  }
-  
-  .navbar .logo img {
+}
+
+.navbar .logo img {
     height: 200px;
-  }
-  
-  .nav-links {
+}
+
+.nav-links {
     display: flex;
     gap: 20px;
-  }
-  
-  .nav-links a {
+}
+
+.nav-links a {
     text-decoration: none;
     color: #333;
     font-weight: bold;
     transition: color 0.3s ease;
-  }
-  
-  .nav-links a:hover {
+}
+
+.nav-links a:hover {
     color: red;
-  }
-  
-  /* Contact Me Button */
-  .contact-btn {
+}
+
+/* Contact Me Button */
+.contact-btn {
     padding: 10px 20px;
     text-decoration: none;
     color: red;
@@ -52,15 +53,15 @@ body {
     border-radius: 5px;
     font-weight: bold;
     transition: background-color 0.3s ease;
-  }
-  
-  .contact-btn:hover {
+}
+
+.contact-btn:hover {
     background-color: red;
     color: #fff;
-  }
-  
-  /* Button Styles */
-  #strava-login-btn {
+}
+
+/* Button Styles */
+#strava-login-btn {
     margin: 20px 0;
     padding: 10px 20px;
     font-size: 1rem;
@@ -70,16 +71,16 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-  }
-  
-  #strava-login-btn:hover {
+}
+
+#strava-login-btn:hover {
     background-color: rgb(117, 0, 0);
     border: 1px solid rgb(117, 0, 0);
     color: #fff;
-  }
-  
-  /* Mobile Navbar */
-  .mobile-navbar {
+}
+
+/* Mobile Navbar */
+.mobile-navbar {
     display: none;
     position: fixed;
     bottom: 0;
@@ -88,45 +89,59 @@ body {
     border-top: 1px solid #ccc;
     padding: 10px 0;
     z-index: 1000;
-  }
-  
-  .mobile-navbar a {
-    display: inline-block;
-    width: 25%;
+    justify-content: space-around; /* Ensure the buttons are evenly spaced */
+    align-items: center;
+    flex-direction: row;
+    display: flex;
+}
+
+.mobile-navbar a {
     text-decoration: none;
     color: #333;
     font-size: 1.5rem;
     transition: color 0.3s ease;
-  }
-  
-  .mobile-navbar a:hover {
+    text-align: center;
+}
+
+.mobile-navbar a:hover {
     color: red;
-  }
-  
-  .contact-btn-mobile {
+}
+
+.contact-btn-mobile {
     padding: 10px 20px;
     background-color: red;
     color: white;
     border-radius: 5px;
     font-weight: bold;
     transition: background-color 0.3s ease;
-  }
-  
-  .contact-btn-mobile:hover {
+}
+
+.contact-btn-mobile:hover {
     background-color: darkred;
-  }
-  
-  /* Media Query for mobile devices (max-width: 768px) */
-  @media (max-width: 768px) {
+}
+
+/* Media Query for mobile devices (max-width: 768px) */
+@media (max-width: 768px) {
     /* Show mobile navbar */
     .mobile-navbar {
-      display: flex;
-      justify-content: space-around;
+        display: flex;
     }
-  
+
     /* Hide desktop navbar */
     .navbar {
-      display: none;
+        display: none;
     }
-  }
-  
+}
+
+/* Media Query for desktop devices (min-width: 769px) */
+@media (min-width: 769px) {
+    /* Show desktop navbar */
+    .navbar {
+        display: flex;
+    }
+
+    /* Hide mobile navbar */
+    .mobile-navbar {
+        display: none;
+    }
+}
