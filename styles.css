@@ -19,12 +19,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #fff; /* Dark background for navbar */
+    background-color: #fff;
     color: #333;
   }
   
   .navbar .logo img {
-    height: 200px; /* Adjust logo size */
+    height: 200px;
   }
   
   .nav-links {
@@ -55,7 +55,7 @@ body {
   }
   
   .contact-btn:hover {
-    background-color: red; /* Darker red on hover */
+    background-color: red;
     color: #fff;
   }
   
@@ -78,80 +78,55 @@ body {
     color: #fff;
   }
   
-  /* Calendar Styles */
-  .calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 days in a week */
-    gap: 10px;
-    max-width: 700px;
-    margin: 20px auto;
-  }
-  
-  .calendar-cell {
-    border: 1px solid #ccc;
-    padding: 5px;
-    min-height: 100px;
-    position: relative;
-  }
-  
-  .calendar-cell .activity-list {
-    max-height: 200px;
-    overflow-y: scroll;
-  }
-  
-  /* Activity Card Styles */
-  .activity-card {
-    border: 1px solid #ddd;
-    padding: 10px;
-    background-color: #f9f9f9;
-    margin-bottom: 10px;
-  }
-  
-  .activity-card h3 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-  
-  .activity-card p {
-    margin: 5px 0;
-    font-size: 1rem;
-  }
-  
-  .activity-card .activity-map {
+  /* Mobile Navbar */
+  .mobile-navbar {
+    display: none;
+    position: fixed;
+    bottom: 0;
     width: 100%;
-    height: 200px;
-    margin-top: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px 0;
+    z-index: 1000;
   }
   
-  /* Map Styles */
-  .leaflet-container {
-    width: 100%;
-    height: 200px;
+  .mobile-navbar a {
+    display: inline-block;
+    width: 25%;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
   }
   
-  /* Chart Styles */
-  #chart-container {
-    width: 60%;
-    margin: 20px auto;
+  .mobile-navbar a:hover {
+    color: red;
   }
   
-  /* Layout adjustments */
-  #calendar {
-    margin: 20px auto;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* For 7 days in a week */
-    gap: 10px;
+  .contact-btn-mobile {
+    padding: 10px 20px;
+    background-color: red;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
   }
   
-  #calendar .calendar-cell {
-    border: 1px solid #ccc;
-    padding: 10px;
-    min-height: 100px;
-    position: relative;
+  .contact-btn-mobile:hover {
+    background-color: darkred;
   }
   
-  #calendar .calendar-cell .activity-list {
-    max-height: 200px;
-    overflow-y: scroll;
+  /* Media Query for mobile devices (max-width: 768px) */
+  @media (max-width: 768px) {
+    /* Show mobile navbar */
+    .mobile-navbar {
+      display: flex;
+      justify-content: space-around;
+    }
+  
+    /* Hide desktop navbar */
+    .navbar {
+      display: none;
+    }
   }
   
